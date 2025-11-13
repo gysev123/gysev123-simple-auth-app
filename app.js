@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 require("dotenv").config();
+const pool = require("./bd.js");
 
 const PORT = process.env.PORT || 3000;
 
@@ -22,4 +23,5 @@ app.get('/test-db', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`сервер запущен на http://localhost:${PORT}`);
 });
+
 
