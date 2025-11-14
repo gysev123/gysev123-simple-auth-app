@@ -23,6 +23,13 @@ router.get("/register", (req, res) => {
   res.sendFile(register);
 });
 
+router.get("/profile", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).send("Сначала войдите в систему");
+  }
+  res.send(`Добро пожаловать, ${req.session.login}`);
+});
+
 router.post("/reg", async (req, res) => {
   const { login, password } = req.body;
 
@@ -54,7 +61,7 @@ router.post("/log", async (req, res) => {
 
   try {
     const result = await verifyUser(login, password);
-    if (!result) {
+    if (result == false) {
       if (!attempts[login]) {
         attempts[login] = { count: 1, firstAttempt: Date.now() };
       } else {
@@ -63,7 +70,9 @@ router.post("/log", async (req, res) => {
       return res.status(401).json({ error: "Неверный логин или пароль" });
     }
     delete attempts[login];
-    res.json({ success: true });
+    req.session.userId = result;
+    req.session.login = login;
+    return res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Ошибка сервера" });
   }

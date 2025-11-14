@@ -18,7 +18,7 @@ async function verifyUser(login, password) {
   if (result.rows.length === 0) return false;
 
   const user = result.rows[0];
-  return await bcrypt.compare(password, user.password_hash);
+  const check = await bcrypt.compare(password, user.password_hash); // Добавил await
+  return check ? user.id : false;
 }
-
 module.exports = { verifyUser, registerUser };
