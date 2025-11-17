@@ -5,7 +5,11 @@ const crypto = require("crypto");
 const { Buffer } = require("buffer");
 const algorithm = "aes-256-cbc";
 require("dotenv").config();
-const key = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
+
+javascript;
+function getKey() {
+  return Buffer.from(process.env.ENCRYPTION_KEY, "hex");
+}
 
 async function registerUser(login, password, email) {
   const hash = await hashPassword(password);
@@ -29,6 +33,7 @@ async function verifyUser(login, password) {
 }
 
 async function encrypt(text) {
+  const key = getKey();
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(text, "utf8", "hex");
@@ -38,6 +43,7 @@ async function encrypt(text) {
 }
 
 function decrypt(encryptedData) {
+  const key = getKey();
   const parts = encryptedData.email.split(":");
   const iv = Buffer.from(parts[0], "hex");
   const encrypted = parts[1];
@@ -48,5 +54,3 @@ function decrypt(encryptedData) {
 }
 
 module.exports = { verifyUser, registerUser, decrypt };
-
-
