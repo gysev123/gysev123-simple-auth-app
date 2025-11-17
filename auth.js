@@ -6,7 +6,6 @@ const { Buffer } = require("buffer");
 const algorithm = "aes-256-cbc";
 require("dotenv").config();
 
-javascript;
 function getKey() {
   return Buffer.from(process.env.ENCRYPTION_KEY, "hex");
 }
@@ -54,3 +53,4 @@ function decrypt(encryptedData) {
 }
 
 module.exports = { verifyUser, registerUser, decrypt };
+
