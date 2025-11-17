@@ -4,6 +4,7 @@ const { hashPassword } = require("./hash.js");
 const crypto = require("crypto");
 const { Buffer } = require("buffer");
 const algorithm = "aes-256-cbc";
+require("dotenv").config();
 const key = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
 
 async function registerUser(login, password, email) {
@@ -47,4 +48,5 @@ function decrypt(encryptedData) {
 }
 
 module.exports = { verifyUser, registerUser, decrypt };
+
 
