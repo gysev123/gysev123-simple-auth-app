@@ -32,12 +32,19 @@ async function verifyUser(login, password) {
 }
 
 async function encrypt(text) {
+  console.log("start")
   const key = getKey();
+  console.log(key)
   const iv = crypto.randomBytes(16);
+  console.log("iv")
   const cipher = crypto.createCipheriv(algorithm, key, iv);
+  console.log(1)
   let encrypted = cipher.update(text, "utf8", "hex");
+  console.log(2)
   encrypted += cipher.final("hex");
+  console.log(3)
   const dataAndIv = iv.toString("hex") + ":" + encrypted.toString("hex");
+  console.log(4)
   return dataAndIv;
 }
 
@@ -53,4 +60,5 @@ function decrypt(encryptedData) {
 }
 
 module.exports = { verifyUser, registerUser, decrypt };
+
 
