@@ -2,8 +2,7 @@ const bcrypt = require("bcrypt");
 const pool = require("./bd.js");
 const { hashPassword } = require("./hash.js");
 const crypto = require("crypto");
-const { Buffer } = require("node:buffer");
-const { log } = require("node:console");
+const { Buffer } = require("buffer");
 const algorithm = "aes-256-cbc";
 const key = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
 
@@ -48,3 +47,4 @@ function decrypt(encryptedData) {
 }
 
 module.exports = { verifyUser, registerUser, decrypt };
+
