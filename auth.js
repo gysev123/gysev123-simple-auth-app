@@ -5,13 +5,7 @@ const crypto = require("crypto");
 const { Buffer } = require("buffer");
 const algorithm = "aes-256-cbc";
 require("dotenv").config();
-
-function getKey() {
-  const key = process.env.ENCRYPTION_KEY;
-  console.log(key)
-  if (!key) throw new Error('ENCRYPTION_KEY not found in environment');
-  return Buffer.from(key, "hex");
-}
+const key = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
 
 async function registerUser(login, password, email) {
   const hash = await hashPassword(password);
@@ -35,7 +29,6 @@ async function verifyUser(login, password) {
 }
 
 async function encrypt(text) {
-  const key = getKey();
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(text, "utf8", "hex");
@@ -45,7 +38,6 @@ async function encrypt(text) {
 }
 
 function decrypt(encryptedData) {
-  const key = getKey();
   const parts = encryptedData.email.split(":");
   const iv = Buffer.from(parts[0], "hex");
   const encrypted = parts[1];
@@ -56,6 +48,3 @@ function decrypt(encryptedData) {
 }
 
 module.exports = { verifyUser, registerUser, decrypt };
-
-
-
