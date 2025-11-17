@@ -9,7 +9,7 @@ document.querySelector("form").addEventListener("submit", async (e) => {
 
   const result = await response.json();
   if (result.success) {
-    window.location.href = "/profile"; // Переход здесь
+    window.location.href = "/profile";
   } else {
     alert(result.error);
   }
