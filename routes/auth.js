@@ -34,7 +34,6 @@ router.get("/profile", (req, res) => {
 
 router.post("/reg", async (req, res) => {
   const { login, password, email } = req.body;
-  console.log(req.body)
 
   const Passworderror = validatePassword(password);
   if (Passworderror) {
@@ -192,3 +191,4 @@ function blockCheck(login) {
 }
 
 module.exports = router;
+
