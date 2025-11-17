@@ -7,7 +7,10 @@ const algorithm = "aes-256-cbc";
 require("dotenv").config();
 
 function getKey() {
-  return Buffer.from(process.env.ENCRYPTION_KEY, "hex");
+  const key = process.env.ENCRYPTION_KEY;
+  console.log(key)
+  if (!key) throw new Error('ENCRYPTION_KEY not found in environment');
+  return Buffer.from(key, "hex");
 }
 
 async function registerUser(login, password, email) {
@@ -32,19 +35,12 @@ async function verifyUser(login, password) {
 }
 
 async function encrypt(text) {
-  console.log("start")
   const key = getKey();
-  console.log(key)
   const iv = crypto.randomBytes(16);
-  console.log("iv")
   const cipher = crypto.createCipheriv(algorithm, key, iv);
-  console.log(1)
   let encrypted = cipher.update(text, "utf8", "hex");
-  console.log(2)
   encrypted += cipher.final("hex");
-  console.log(3)
   const dataAndIv = iv.toString("hex") + ":" + encrypted.toString("hex");
-  console.log(4)
   return dataAndIv;
 }
 
@@ -60,5 +56,6 @@ function decrypt(encryptedData) {
 }
 
 module.exports = { verifyUser, registerUser, decrypt };
+
 
 
