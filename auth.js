@@ -32,7 +32,6 @@ async function verifyUser(login, password) {
     login,
   ]);
   if (result.rows.length === 0) return false;
-  x;
   const user = result.rows[0];
   const check = await bcrypt.compare(password, user.password_hash);
   return check ? user.id : false;
@@ -64,3 +63,4 @@ module.exports = {
   hashPassword,
   comparePassword,
 };
+
