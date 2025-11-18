@@ -1,9 +1,16 @@
 const express = require("express");
 const router = express.Router();
-const { verifyUser, registerUser, decrypt } = require("../auth");
+const {
+  verifyUser,
+  registerUser,
+  decrypt,
+  hashPassword,
+  comparePassword,
+} = require("../auth");
 const path = require("path");
 const pool = require("../bd.js");
-const { error } = require("console");
+const { log } = require("console");
+const session = require("express-session");
 
 const attempts = {};
 const BLOCK_DURATION = 15 * 60 * 1000;
@@ -15,6 +22,11 @@ const main = path.join(__dirname, "../public/html", "index.html");
 const login = path.join(__dirname, "../public/html", "login.html");
 const register = path.join(__dirname, "../public/html", "register.html");
 const profile = path.join(__dirname, "../public/html", "profile.html");
+const changePassword = path.join(
+  __dirname,
+  "../public/html",
+  "/change-password.html"
+);
 
 router.get("/", (req, res) => {
   res.sendFile(main);
@@ -30,6 +42,10 @@ router.get("/register", (req, res) => {
 
 router.get("/profile", (req, res) => {
   res.sendFile(profile);
+});
+
+router.get("/changepassword", (req, res) => {
+  res.sendFile(changePassword);
 });
 
 router.post("/reg", async (req, res) => {
@@ -64,17 +80,16 @@ router.get("/status", async (req, res) => {
   const minutes = Math.floor((uptime % 3600) / 60);
   const seconds = uptime % 60;
 
-
   const activeSessions = Object.keys(
     require("express-session").sessions || {}
   ).length;
 
   try {
-    await pool.query('SELECT NOW()');
+    await pool.query("SELECT NOW()");
     bd = "connected";
   } catch (err) {
-    console.log(err);
-    bd = "disconnected"
+    console.log("Ошибка бд:" + err);
+    bd = "disconnected";
   }
 
   res.json({
@@ -123,39 +138,90 @@ router.post("/log", async (req, res) => {
   }
 });
 
+router.post("/change-password", async (req, res) => {
+  const { oldpassword, newpassword } = req.body;
+  const { login, userId } = req.session;
+
+  console.log(oldpassword, newpassword, userId);
+
+  const blockError = blockCheck(login);
+  if (blockError) {
+    return res.status(429).json({ error: blockError });
+  }
+
+  const error = validatePassword(newpassword);
+  if (error) {
+    return res.status(400).json({ error });
+  }
+  if (newpassword == oldpassword) {
+    return res
+      .status(400)
+      .json({ error: "новый пароль не должен совпадать с текущим" });
+  }
+
+  try {
+    const result = await pool.query(
+      "SELECT password_hash FROM users WHERE id = $1",
+      [userId]
+    );
+    const password_hash = result.rows[0].password_hash;
+    const coincidence = await comparePassword(oldpassword, password_hash);
+    if (coincidence == false) {
+      if (!attempts[login]) {
+        attempts[login] = { count: 1, firstAttempt: Date.now() };
+      } else {
+        attempts[login].count++;
+      }
+      return res.status(401).json({ error: "Неверный пароль" });
+    } else {
+      const newpassword_hash = await hashPassword(newpassword);
+      await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [
+        newpassword_hash,
+        userId,
+      ]);
+      req.session.destroy((err) => {
+        if (err) return res.status(500).json({ error: "Ошибка сервера" });
+        res.json({ success: true });
+      });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Ошибка сервера" });
+  }
+});
+
 router.get("/SessionData", (req, res) => {
   let sessionData = {};
-  console.log(req.session.userId)
   if (req.session.userId) {
-    pool.query('SELECT email FROM users WHERE id = $1', [req.session.userId])
-    .then(async result => {
-      const emailCrypto = result.rows[0];
-      console.log(emailCrypto)
-      const email = decrypt(emailCrypto);
+    pool
+      .query("SELECT email FROM users WHERE id = $1", [req.session.userId])
+      .then(async (result) => {
+        const emailCrypto = result.rows[0];
+        const email = decrypt(emailCrypto);
 
-    sessionData = {
-      userId: req.session.userId,
-      login: req.session.login,
-      email,
-    };
-  res.json(sessionData);
-  }).catch(error => {
-    console.log(error)
-  })
-  }else res.json(null)
+        sessionData = {
+          userId: req.session.userId,
+          login: req.session.login,
+          email,
+        };
+        res.json(sessionData);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  } else res.json(null);
 });
 
 router.post("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) return res.status(500).json({ error: "Ошибка сервера" });
-    res.json({ success: true }); 
+    res.json({ success: true });
   });
 });
 
 function validateEmail(email) {
   if (email.length < 3) return "email слишком короткий";
-if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-  return "Email должен соответствовать виду example@email.com";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return "Email должен соответствовать виду example@email.com";
   return null;
 }
 
@@ -191,4 +257,3 @@ function blockCheck(login) {
 }
 
 module.exports = router;
-

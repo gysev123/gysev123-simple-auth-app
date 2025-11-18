@@ -48,12 +48,12 @@ input[type="submit"] {
   background: #e0afff;
 }
 
-.profileBtn { 
-  padding: 10px; 
-  background: #2c3e50; 
-  color: white; 
-  border: none; 
-  border-radius: 5px; 
+.profileBtn {
+  padding: 10px;
+  background: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 5px;
   margin-top: 10px;
 }
 

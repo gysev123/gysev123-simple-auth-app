@@ -8,14 +8,14 @@ fetch("/SessionData")
     return response.json();
   })
   .then((session) => {
-    console.log("Получены данные:", session);
     if (!session) {
       welcome.innerHTML = `<p>чтобы продолжить необходимо войти</p>`;
       button.innerHTML = `<button data-type="login" class="profileBtn">войти</button>`;
     } else {
       welcome.innerHTML = `<p>Добро пожаловать, ${session.login}</p>`;
       button.innerHTML = `<button data-type="logout" class="profileBtn">выйти</button>
-      <button data-type="email" class="profileBtn visible">посмотреть почту</button>`;
+      <button data-type="email" class="profileBtn visible">посмотреть почту</button>
+      <button data-type="changepassword" class="profileBtn">сменить пароль</button>`;
       emailDiv.innerHTML = `<p id="emailText" class="hidden">${session.email}<\p>`;
     }
   })
@@ -40,5 +40,9 @@ button.onclick = function (event) {
       const emailBtn = document.querySelector(".visible");
       emailBtn.style.display = "none";
       emailT.style.display = "block";
+      break;
+    case "changepassword":
+      window.location.href = "/changepassword";
+      break;
   }
 };

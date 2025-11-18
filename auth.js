@@ -1,11 +1,21 @@
 const bcrypt = require("bcrypt");
 const pool = require("./bd.js");
-const { hashPassword } = require("./hash.js");
 const crypto = require("crypto");
 const { Buffer } = require("buffer");
 const algorithm = "aes-256-cbc";
 require("dotenv").config();
 const key = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
+
+const hashPassword = async (plainPassword) => {
+  const saltRounds = 10;
+  const hash = await bcrypt.hash(plainPassword, saltRounds);
+  return hash;
+};
+
+const comparePassword = async (oldpassword, oldpassword_hash) => {
+  const check = await bcrypt.compare(oldpassword, oldpassword_hash);
+  return check;
+};
 
 async function registerUser(login, password, email) {
   const hash = await hashPassword(password);
@@ -22,7 +32,7 @@ async function verifyUser(login, password) {
     login,
   ]);
   if (result.rows.length === 0) return false;
-
+  x;
   const user = result.rows[0];
   const check = await bcrypt.compare(password, user.password_hash);
   return check ? user.id : false;
@@ -47,4 +57,10 @@ function decrypt(encryptedData) {
   return decrypted;
 }
 
-module.exports = { verifyUser, registerUser, decrypt };
+module.exports = {
+  verifyUser,
+  registerUser,
+  decrypt,
+  hashPassword,
+  comparePassword,
+};
