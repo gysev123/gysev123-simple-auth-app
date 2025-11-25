@@ -5,13 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>register</title>
     <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/register.js?v=1" defer></script>
   </head>
   <body>
+    <p>зарегистрироваться</p>
     <form action="/reg" method="post">
-      <input type="text" name="login" placeholder="login" />
-      <input type="text" name="email" placeholder="email" />
-      <input type="password" name="password" placeholder="password" />
-      <input type="submit" value="register" />
+      <input type="text" name="login" placeholder="login" id="login" />
+      <input type="text" name="email" placeholder="email" id="email"/>
+      <div id="place">
+      <input type="submit" class="visible" value="получить код" data-action="get_token" id="gettoken"/>
+        <input type="text" class="hidden" placeholder="token" id="token"/>
+        <input type="submit" class="hidden" value="подтвердить" id="confitmemail" data-action="confirm_email"/>
+      </div>
+      <input type="password" name="password" placeholder="password" id="password"/>
+      <input type="submit" value="зарегистрироваться" id="reg" data-action="register" disabled/>
     </form>
   </body>
 </html>

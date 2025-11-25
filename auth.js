@@ -6,10 +6,19 @@ const algorithm = "aes-256-cbc";
 require("dotenv").config();
 const key = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
 
-const hashPassword = async (plainPassword) => {
+const randomBytes = (bytes) => {
+  const result = crypto.randomBytes(bytes).toString("hex");
+  return result;
+};
+
+const hashing = async (plain) => {
   const saltRounds = 10;
-  const hash = await bcrypt.hash(plainPassword, saltRounds);
+  const hash = await bcrypt.hash(plain, saltRounds);
   return hash;
+};
+
+const hash256 = (text) => {
+  return crypto.createHash("sha256").update(text).digest("hex");
 };
 
 const comparePassword = async (oldpassword, oldpassword_hash) => {
@@ -18,13 +27,28 @@ const comparePassword = async (oldpassword, oldpassword_hash) => {
 };
 
 async function registerUser(login, password, email) {
-  const hash = await hashPassword(password);
-  const emailCrypto = await encrypt(email);
-  const result = await pool.query(
-    "INSERT INTO users (login, password_hash, created_at, email) VALUES ($1, $2, $3, $4) RETURNING id",
-    [login, hash, new Date(), emailCrypto]
-  );
-  return result.rows[0].id;
+  try {
+    const hash = await hashing(password);
+    const emailCrypto = await encrypt(email);
+    const emailhash = hash256(email);
+
+    const result = await pool.query(
+      "INSERT INTO users (login, password_hash, created_at, email, email_hash) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+      [login, hash, new Date(), emailCrypto, emailhash]
+    );
+
+    return { userId: result.rows[0].id };
+  } catch (error) {
+    if (error.code === "23505") {
+      const detail = error.detail.toLowerCase();
+
+      if (detail.includes("login")) {
+        return { error: "Логин уже занят" };
+      } else if (detail.includes("email_hash")) {
+        return { error: "Email уже используется" };
+      }
+    }
+  }
 }
 
 async function verifyUser(login, password) {
@@ -60,7 +84,9 @@ module.exports = {
   verifyUser,
   registerUser,
   decrypt,
-  hashPassword,
+  hashing,
   comparePassword,
+  randomBytes,
+  hash256,
+  encrypt,
 };
-

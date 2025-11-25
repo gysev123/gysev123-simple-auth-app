@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>смена почты</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/change-email.js?v=1" defer></script>
+  </head>
+  <body>
+    <div id="title">
+      <p>введите пароль</p>
+    </div>
+    <form method="post">
+      <input
+        type="password"
+        name="password"
+        placeholder="password"
+        id="password"
+      />
+      <input
+        type="submit"
+        class="visible"
+        value="продолжить"
+        data-action="checkpassword"
+        id="checkpassword"
+      />
+      <div id="place">
+        <input
+          type="text"
+          name="email"
+          placeholder="email"
+          id="email"
+          class="hidden"
+        />
+        <input type="text" class="hidden" placeholder="token" id="token" />
+        <input
+          type="submit"
+          class="hidden"
+          value="получить токен"
+          data-action="get_token"
+          id="gettoken"
+        />
+      </div>
+      <input
+        type="submit"
+        value="сменить почту"
+        id="changeemail"
+        data-action="changeemail"
+        class="hidden"
+      />
+    </form>
+  </body>
+</html>

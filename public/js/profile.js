@@ -1,6 +1,6 @@
 const welcome = document.getElementById("welcome");
 const button = document.getElementById("button");
-const emailDiv = document.getElementById("email");
+const emailDiv = document.getElementById("emailContent");
 
 fetch("/SessionData")
   .then((response) => {
@@ -15,7 +15,8 @@ fetch("/SessionData")
       welcome.innerHTML = `<p>Добро пожаловать, ${session.login}</p>`;
       button.innerHTML = `<button data-type="logout" class="profileBtn">выйти</button>
       <button data-type="email" class="profileBtn visible">посмотреть почту</button>
-      <button data-type="changepassword" class="profileBtn">сменить пароль</button>`;
+      <button data-type="changepassword" class="profileBtn">сменить пароль</button>
+      <button data-type="changeemail" class="profileBtn">сменить почту</button>`;
       emailDiv.innerHTML = `<p id="emailText" class="hidden">${session.email}<\p>`;
     }
   })
@@ -43,6 +44,9 @@ button.onclick = function (event) {
       break;
     case "changepassword":
       window.location.href = "/changepassword";
+      break;
+    case "changeemail":
+      window.location.href = "/changeemail";
       break;
   }
 };
